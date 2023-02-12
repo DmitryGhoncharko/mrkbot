@@ -1,29 +1,21 @@
 import cache.UsersCache;
+import command.Command;
+import command.InitialContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import sticker.Stickers;
-
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Random;
 
 
 public class Bot extends TelegramLongPollingBot {
-    private  boolean firstMessage = false;
-    private int currentDay = new GregorianCalendar().getTime().getDay();
-
-    private int currentDayMem = new GregorianCalendar().getTime().getDay();
-    private String currentPidor;
-    private int bratCounter = 0;
-
+    private static final Logger LOG = LoggerFactory.getLogger(Bot.class);
+    private final InitialContext initialContext = new InitialContext();
     public static void main(String[] args) throws TelegramApiException {
 
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
@@ -40,84 +32,31 @@ public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         final String message = update.getMessage().getText();
         addUserDataToCache(update);
-        daPizda(message, update);
-        mem(update);
-        final Long chatId = update.getMessage().getChatId();
-        switch (message) {
-            case "/pidor": {
-                showPidorDay(update);
+        if (message!=null){
+            Command memCommand = initialContext.getCommandFromCache("memcmnd");
+            Command daCommand = initialContext.getCommandFromCache("dacmnd");
+            try{
+                SendSticker sendMessageMem = (SendSticker) memCommand.execute(update);
+                execute(sendMessageMem);
+            }catch (Throwable e){
+                LOG.info(e.getMessage());
             }
-            case "/brat": {
-                if (bratCounter == 1) {
-                    bratCounter = 0;
-                    SendSticker sticker = new SendSticker();
-                    sticker.setChatId(update.getMessage().getChatId());
-                    sticker.setSticker(new InputFile(Stickers.GACHI.getStickerId()));
-                    try {
-                        execute(sticker);
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    bratCounter++;
+            try {
+                SendMessage sendStickerDa = (SendMessage) daCommand.execute(update);
+                execute(sendStickerDa);
+            }catch (Throwable e){
+                LOG.info(e.getMessage());
+            }
+            Command command = initialContext.getCommandFromCache(message);
+            if(command!=null){
+                try{
+                    SendMessage sendMessage = (SendMessage) command.execute(update);
+                    execute(sendMessage);
+                }catch (Throwable e){
+                    LOG.error(e.getMessage());
                 }
             }
         }
-
-    }
-    private void mem(Update update){
-        if(currentDayMem != new GregorianCalendar().getTime().getDay()){
-            currentDayMem = new GregorianCalendar().getTime().getDay();
-            SendSticker sticker = new SendSticker();
-            sticker.setChatId(update.getMessage().getChatId());
-            sticker.setSticker(new InputFile(Stickers.EBAT.getStickerId()));
-            try {
-                execute(sticker);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-    private void daPizda(String message, Update update) {
-        if (Arrays.stream(message.split(" ")).filter(x -> x.equalsIgnoreCase("да")).findFirst().isPresent()) {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Пизда");
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void showPidorDay(Update update) {
-        SendMessage sendMessage = new SendMessage();
-        if (currentPidor == null) {
-            currentPidor = getPidorFromCache();
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Ебучий пидор дня @" + currentPidor);
-
-        } else if (currentDay != new GregorianCalendar().getTime().getDay()) {
-            currentPidor = getPidorFromCache();
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Ебучий пидор дня @" + currentPidor);
-            currentDay = new GregorianCalendar().getTime().getDay();
-        } else {
-            sendMessage.setChatId(update.getMessage().getChatId());
-            sendMessage.setText("Ебучий пидор дня @" + currentPidor);
-
-        }
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getPidorFromCache() {
-        final int randomUserIndex = new Random().nextInt(UsersCache.getCacheSize());
-        return UsersCache.getUserNameByIndex(randomUserIndex);
     }
 
     private void addUserDataToCache(Update update) {
@@ -137,6 +76,6 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "5458626734:AAErADnNMVo-Aru7SCAWTq1ylcgwjjaj3p4";
+        return "5458626734:AAHpVJq4pa3oo8E7t9qdqviWUyDQq2zlTuI";
     }
 }
