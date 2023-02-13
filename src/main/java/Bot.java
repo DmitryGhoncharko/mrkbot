@@ -76,7 +76,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private void addUserDataToCache(Update update) {
         final String userName = update.getMessage().getFrom().getUserName();
-        if (userName.equals("Vlad_korzunov")) {
+        if (userName.equals("Vlad_korzunov") || userName.equals("eblankoroche")) {
             return;
         }
         if (!UsersCache.userIsPresent(userName).isPresent()) {

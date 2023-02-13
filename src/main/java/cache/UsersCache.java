@@ -9,7 +9,6 @@ public final class UsersCache {
 
     static {
         USERS.add("dangeonMaster21");
-        USERS.add("eblankoroche");
         USERS.add("cryflystbt");
         USERS.add("hachapury18");
         USERS.add("Tapokminzk");
