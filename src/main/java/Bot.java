@@ -7,6 +7,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
@@ -33,6 +34,20 @@ public class Bot extends TelegramLongPollingBot {
         final String message = update.getMessage().getText();
         addUserDataToCache(update);
         if (message!=null){
+            if(message.startsWith("/dell")){
+
+                try {
+                    String[] data = message.split(" ");
+                    DeleteMessage deleteMessage = new DeleteMessage();
+                    deleteMessage.setChatId(data[0]);
+                    deleteMessage.setMessageId(Integer.parseInt(data[1]));
+                    execute(deleteMessage);
+                } catch (Throwable e) {
+                    LOG.info(e.getMessage());
+                }
+            }
+
+
             Command memCommand = initialContext.getCommandFromCache("memcmnd");
             Command daCommand = initialContext.getCommandFromCache("dacmnd");
             try{
