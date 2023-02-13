@@ -39,8 +39,8 @@ public class Bot extends TelegramLongPollingBot {
                 try {
                     String[] data = message.split(" ");
                     DeleteMessage deleteMessage = new DeleteMessage();
-                    deleteMessage.setChatId(data[0]);
-                    deleteMessage.setMessageId(Integer.parseInt(data[1]));
+                    deleteMessage.setChatId(data[1]);
+                    deleteMessage.setMessageId(Integer.parseInt(data[2]));
                     execute(deleteMessage);
                 } catch (Throwable e) {
                     LOG.info(e.getMessage());
