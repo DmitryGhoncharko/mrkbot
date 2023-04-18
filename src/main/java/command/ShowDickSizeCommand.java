@@ -1,6 +1,8 @@
 package command;
 
 import entity.UserDick;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -9,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import java.util.*;
 
 public class ShowDickSizeCommand implements Command<SendMessage> {
+    private static final Logger LOG  = LoggerFactory.getLogger(ShowDickSizeCommand.class);
     private static final List<UserDick> USER_DICKS = new ArrayList<>();
     private static int currentDayMem = new GregorianCalendar().getTime().getDay();
 
@@ -40,6 +43,8 @@ public class ShowDickSizeCommand implements Command<SendMessage> {
         sendMessage.setChatId(update.getMessage().getChatId());
         sendMessage.setText(dickMessage);
         USER_DICKS.add(new UserDick(userName, dickMessage));
+        LOG.info("Current day = " + currentDayMem);
+        LOG.info("Real day = " + new GregorianCalendar().getTime().getDay());
         return sendMessage;
 
     }
